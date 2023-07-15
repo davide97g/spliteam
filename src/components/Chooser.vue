@@ -126,6 +126,10 @@ const addEvents = () => {
   canvas.addEventListener("touchend", onTouchEnd);
 };
 
+const clearData = () => {
+  currentTouches.value = [];
+};
+
 const fix = () => {
   removeEvents();
   clearCanvas();
@@ -133,6 +137,7 @@ const fix = () => {
   message.success("SPLIT UP!");
   setTimeout(() => {
     clearCanvas();
+    clearData();
     addEvents();
   }, 5000);
 };
@@ -151,4 +156,6 @@ const draw = () => {
     timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
   } else if (timeout.value) clearTimeout(timeout.value);
 };
+
+addEvents();
 </script>
