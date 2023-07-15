@@ -9,6 +9,7 @@
     <Config :showModal="showModal" @close="() => (showModal = false)" />
     <canvas id="canvas" />
     <Chooser v-if="readyCanvas" @reload="() => reload()" />
+    <Footer />
   </n-message-provider>
 </template>
 
@@ -16,6 +17,7 @@
 import { ref } from "vue";
 import Chooser from "./components/Chooser.vue";
 import Config from "./components/Config.vue";
+import Footer from "./components/Footer.vue";
 import { NMessageProvider } from "naive-ui";
 import { Icon } from "@vicons/utils";
 import { Settings } from "@vicons/carbon";
