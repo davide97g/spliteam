@@ -1,33 +1,30 @@
 <template>
   <div style="position: absolute; top: 10px; left: 10px">
-    <p>
-      {{ currentTouches.map((touch) => touch.id).join(", ") }}
-    </p>
-    <p v-if="message">
-      {{ message }}
-    </p>
+    <p>{{ total }} / {{ REQUIRED }} touches</p>
+    {{ message }}
   </div>
-  <canvas id="canvas"></canvas>
+  <canvas id="canvas" />
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
-//-------------------------//
-// Initialization and
-// Global constiables
-//-------------------------//
+const DEFAULT_TIMEOUT = 1000;
+const REQUIRED = 4;
+const TEAMS = 2;
+const COLORS = ["#00A3EE", "#D80351"];
 
-// Used to keep track of active touches.
 const currentTouches = ref<any[]>([]);
+const timeout = ref<any>(null);
+
 const message = ref("");
 
-// Get the canvas.
+const total = computed(() => currentTouches.value.length);
+
 setTimeout(() => {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
   if (!canvas) return;
 
-  console.log("canvas", canvas);
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
@@ -36,21 +33,10 @@ setTimeout(() => {
     canvas.height = window.innerHeight;
   };
 
-  window.addEventListener("resize", resizeCanvas, false);
-
   resizeCanvas();
 
-  //-------------------------//
-  // Helper Methods
-  //-------------------------//
+  window.addEventListener("resize", resizeCanvas, false);
 
-  // Returns a random color from an array.
-  const randomColor = function () {
-    const colors = ["#3F3F3F", "#929292", "#00A3EE", "#F5D908", "#D80351"];
-    return colors[Math.floor(Math.random() * colors.length)];
-  };
-
-  // Finds the array index of a touch in the currentTouches.value array.
   const findCurrentTouchIndex = function (id: any) {
     for (let i = 0; i < currentTouches.value.length; i++) {
       if (currentTouches.value[i].id === id) {
@@ -62,19 +48,12 @@ setTimeout(() => {
     return -1;
   };
 
-  //-------------------------//
-  // Handler Methods
-  //-------------------------//
-
-  // Creates a new touch in the currentTouches.value array and draws the starting
-  // point on the canvas.
-  const touchStarted = function (event: any) {
+  const touchStarted = function (event: TouchEvent) {
     const touches = event.changedTouches;
-    message.value = `touchStarted: ${JSON.stringify(touches)}`;
 
     for (let i = 0; i < touches.length; i++) {
       const touch = touches[i];
-      const touchColor = randomColor();
+      const touchColor = "#3F3F3F";
 
       currentTouches.value.push({
         id: touch.identifier,
@@ -85,11 +64,8 @@ setTimeout(() => {
     }
   };
 
-  // Draws a line to the final touch position on the canvas and then
-  // removes the touh from the currentTouches.value array.
-  const touchEnded = function (event: any) {
+  const touchEnded = function (event: TouchEvent) {
     const touches = event.changedTouches;
-    message.value = `touchEnded: ${JSON.stringify(touches)}`;
 
     for (let i = 0; i < touches.length; i++) {
       const touch = touches[i];
@@ -100,35 +76,65 @@ setTimeout(() => {
     }
   };
 
-  //-------------------------//
-  // Event Listeners
-  //-------------------------//
+  const onTouchStart = (e: TouchEvent) => {
+    e.preventDefault();
+    touchStarted(e);
+    draw();
+  };
+
+  const onTouchEnd = (e: TouchEvent) => {
+    e.preventDefault();
+    touchEnded(e);
+    draw();
+  };
+
+  const clearCanvas = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  const decideColors = () => {
+    // const colors: string[] = [];
+    // 5 REQUIRED | 2 TEAMS => b,b,r,r,r
+    // 6 REQUIRED | 2 TEAMS => b,b,b,r,r,r
+    // 7 REQUIRED | 2 TEAMS => b,b,b,r,r,r,r
+    const colorsAvailable: string[] = [];
+    for (let i = 0; i < REQUIRED; i++) colorsAvailable.push(COLORS[i % TEAMS]);
+    console.log(colorsAvailable);
+    message.value = colorsAvailable.join(", ");
+    setTimeout(() => (message.value = ""), 3000);
+    currentTouches.value.forEach((touch, i) => {
+      ctx.beginPath();
+      ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
+      ctx.fillStyle = colorsAvailable[i];
+      ctx.fill();
+    });
+  };
+
+  const fix = () => {
+    canvas.removeEventListener("touchstart", onTouchStart);
+    canvas.removeEventListener("touchend", onTouchEnd);
+    clearCanvas();
+    decideColors();
+  };
 
   const draw = () => {
-    // clean the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    clearCanvas();
     currentTouches.value.forEach((touch) => {
       ctx.beginPath();
       ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
       ctx.fillStyle = touch.color;
       ctx.fill();
     });
+
+    if (currentTouches.value.length === REQUIRED) {
+      if (timeout.value) clearTimeout(timeout.value);
+      timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
+    } else if (timeout.value) clearTimeout(timeout.value);
   };
 
-  // Set up an event listener for new touches.
-  canvas.addEventListener("touchstart", function (e) {
-    e.preventDefault();
-    touchStarted(e);
-    draw();
-  });
-
-  // Set up an event listener for when a touch ends.
-  canvas.addEventListener("touchend", function (e) {
-    e.preventDefault();
-    touchEnded(e);
-    draw();
-  });
-}, 1000);
+  canvas.addEventListener("touchstart", onTouchStart);
+  canvas.addEventListener("touchend", onTouchEnd);
+}, 100);
 </script>
 
 <style scoped></style>
