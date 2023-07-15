@@ -41,7 +41,7 @@ setTimeout(() => {
 
   resizeCanvas();
 
-  window.addEventListener("resize", resizeCanvas, false);
+  // window.addEventListener("resize", resizeCanvas, false);
 
   const findCurrentTouchIndex = function (id: any) {
     for (let i = 0; i < currentTouches.value.length; i++) {
