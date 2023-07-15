@@ -3,6 +3,9 @@
     <p>
       {{ currentTouches.map((touch) => touch.id).join(", ") }}
     </p>
+    <p v-if="message">
+      {{ message }}
+    </p>
   </div>
   <canvas id="canvas"></canvas>
 </template>
@@ -17,6 +20,7 @@ import { ref } from "vue";
 
 // Used to keep track of active touches.
 const currentTouches = ref<any[]>([]);
+const message = ref("");
 
 // Get the canvas.
 setTimeout(() => {
@@ -65,6 +69,7 @@ setTimeout(() => {
   // point on the canvas.
   const touchStarted = function (event: any) {
     const touches = event.changedTouches;
+    message.value = `touchStarted: ${JSON.stringify(event.changedTouches)}`;
     if (!ctx) return;
 
     for (let i = 0; i < touches.length; i++) {
@@ -89,6 +94,7 @@ setTimeout(() => {
   // removes the touh from the currentTouches.value array.
   const touchEnded = function (event: any) {
     const touches = event.changedTouches;
+    message.value = `touchEnded: ${JSON.stringify(event.changedTouches)}`;
     if (!ctx) return;
 
     for (let i = 0; i < touches.length; i++) {
