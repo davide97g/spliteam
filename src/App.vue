@@ -69,7 +69,7 @@ setTimeout(() => {
   // point on the canvas.
   const touchStarted = function (event: any) {
     const touches = event.changedTouches;
-    message.value = `touchStarted: ${JSON.stringify(event.changedTouches)}`;
+    message.value = `touchStarted: ${JSON.stringify(touches)}`;
     if (!ctx) return;
 
     for (let i = 0; i < touches.length; i++) {
@@ -94,7 +94,7 @@ setTimeout(() => {
   // removes the touh from the currentTouches.value array.
   const touchEnded = function (event: any) {
     const touches = event.changedTouches;
-    message.value = `touchEnded: ${JSON.stringify(event.changedTouches)}`;
+    message.value = `touchEnded: ${JSON.stringify(touches)}`;
     if (!ctx) return;
 
     for (let i = 0; i < touches.length; i++) {
