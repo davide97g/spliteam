@@ -116,13 +116,25 @@ const decideColors = () => {
   });
 };
 
-const fix = () => {
+const removeEvents = () => {
   canvas.removeEventListener("touchstart", onTouchStart);
   canvas.removeEventListener("touchend", onTouchEnd);
+};
+
+const addEvents = () => {
+  canvas.addEventListener("touchstart", onTouchStart);
+  canvas.addEventListener("touchend", onTouchEnd);
+};
+
+const fix = () => {
+  removeEvents();
   clearCanvas();
   decideColors();
   message.success("SPLIT UP!");
-  setTimeout(() => clearCanvas(), 5000);
+  setTimeout(() => {
+    clearCanvas();
+    addEvents();
+  }, 5000);
 };
 
 const draw = () => {
@@ -139,7 +151,4 @@ const draw = () => {
     timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
   } else if (timeout.value) clearTimeout(timeout.value);
 };
-
-canvas.addEventListener("touchstart", onTouchStart);
-canvas.addEventListener("touchend", onTouchEnd);
 </script>
