@@ -1,10 +1,10 @@
 <template>
   <div style="position: absolute; top: 10px; left: 10px">
-    <h2>REQUIRED</h2>
-    <input type="number" v-model="REQUIRED" />
-    <h2>TEAMS</h2>
-    <input type="number" v-model="TEAMS" />
-    <p>{{ total }} / {{ REQUIRED }} touches</p>
+    <h2>required</h2>
+    <input type="number" v-model="required" />
+    <h2>teams</h2>
+    <input type="number" v-model="teams" />
+    <p>{{ total }} / {{ required }} touches</p>
     {{ message }}
   </div>
   <div style="position: absolute; top: 10px; right: 10px">
@@ -17,9 +17,21 @@
 import { computed, ref } from "vue";
 
 const DEFAULT_TIMEOUT = 1000;
-const REQUIRED = 4;
-const TEAMS = 2;
-const COLORS = ["#00A3EE", "#D80351"];
+const required = ref(4);
+const teams = ref(2);
+const COLORS = [
+  "#00A3EE",
+  "#D80351",
+  "#F9B700",
+  "#FFA3B1",
+  "#FFD1BA",
+  "#B5EAD7",
+  "#C7CEEA",
+  "#FFDAC1",
+  "#BDE0FE",
+];
+
+// const SHAPES = ["circle", "square", "triangle"];
 
 const currentTouches = ref<any[]>([]);
 const timeout = ref<any>(null);
@@ -103,11 +115,12 @@ setTimeout(() => {
 
   const decideColors = () => {
     // const colors: string[] = [];
-    // 5 REQUIRED | 2 TEAMS => b,b,r,r,r
-    // 6 REQUIRED | 2 TEAMS => b,b,b,r,r,r
-    // 7 REQUIRED | 2 TEAMS => b,b,b,r,r,r,r
+    // 5 required | 2 teams => b,b,r,r,r
+    // 6 required | 2 teams => b,b,b,r,r,r
+    // 7 required | 2 teams => b,b,b,r,r,r,r
     const colorsAvailable: string[] = [];
-    for (let i = 0; i < REQUIRED; i++) colorsAvailable.push(COLORS[i % TEAMS]);
+    for (let i = 0; i < required.value; i++)
+      colorsAvailable.push(COLORS[i % teams.value]);
     colorsAvailable.sort(() => Math.random() - 0.5);
     message.value = colorsAvailable.join(", ");
 
@@ -124,6 +137,9 @@ setTimeout(() => {
     canvas.removeEventListener("touchend", onTouchEnd);
     clearCanvas();
     decideColors();
+    setTimeout(() => {
+      reload();
+    }, 10000);
   };
 
   const draw = () => {
@@ -135,7 +151,7 @@ setTimeout(() => {
       ctx.fill();
     });
 
-    if (currentTouches.value.length === REQUIRED) {
+    if (currentTouches.value.length === required.value) {
       if (timeout.value) clearTimeout(timeout.value);
       timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
     } else if (timeout.value) clearTimeout(timeout.value);
