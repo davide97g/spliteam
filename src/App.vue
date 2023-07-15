@@ -1,7 +1,14 @@
 <template>
   <div style="position: absolute; top: 10px; left: 10px">
+    <h2>REQUIRED</h2>
+    <input type="number" v-model="REQUIRED" />
+    <h2>TEAMS</h2>
+    <input type="number" v-model="TEAMS" />
     <p>{{ total }} / {{ REQUIRED }} touches</p>
     {{ message }}
+  </div>
+  <div style="position: absolute; top: 10px; right: 10px">
+    <button @click="reload">Reload</button>
   </div>
   <canvas id="canvas" />
 </template>
@@ -20,6 +27,8 @@ const timeout = ref<any>(null);
 const message = ref("");
 
 const total = computed(() => currentTouches.value.length);
+
+const reload = () => window.location.reload();
 
 setTimeout(() => {
   const canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
@@ -99,9 +108,9 @@ setTimeout(() => {
     // 7 REQUIRED | 2 TEAMS => b,b,b,r,r,r,r
     const colorsAvailable: string[] = [];
     for (let i = 0; i < REQUIRED; i++) colorsAvailable.push(COLORS[i % TEAMS]);
-    console.log(colorsAvailable);
+    colorsAvailable.sort(() => Math.random() - 0.5);
     message.value = colorsAvailable.join(", ");
-    setTimeout(() => (message.value = ""), 3000);
+
     currentTouches.value.forEach((touch, i) => {
       ctx.beginPath();
       ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
