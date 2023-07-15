@@ -4,19 +4,11 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useSettingsStore } from "../store/settings";
+import { useMessage } from "naive-ui";
 
-const { required, teams } = defineProps({
-  required: {
-    type: Number,
-    default: 4,
-  },
-  teams: {
-    type: Number,
-    default: 2,
-  },
-});
-
-const emits = defineEmits(["reload"]);
+const store = useSettingsStore();
+const message = useMessage();
 
 const DEFAULT_TIMEOUT = 1000;
 const COLORS = [
@@ -92,7 +84,7 @@ setTimeout(() => {
 
   const onTouchStart = (e: TouchEvent) => {
     e.preventDefault();
-    if (e.touches.length > required) return;
+    if (e.touches.length > store.required) return;
     touchStarted(e);
     draw();
   };
@@ -109,14 +101,23 @@ setTimeout(() => {
 
   const decideColors = () => {
     const colorsAvailable: string[] = [];
-    for (let i = 0; i < required; i++) colorsAvailable.push(COLORS[i % teams]);
+    for (let i = 0; i < store.required; i++)
+      colorsAvailable.push(COLORS[i % store.teams]);
     colorsAvailable.sort(() => Math.random() - 0.5);
 
     currentTouches.value.forEach((touch, i) => {
+      ctx.globalAlpha = 0.8;
       ctx.beginPath();
       ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
       ctx.fillStyle = colorsAvailable[i];
       ctx.fill();
+
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.arc(touch.pageX, touch.pageY, 56, 0, 2 * Math.PI);
+      ctx.strokeStyle = colorsAvailable[i];
+      ctx.lineWidth = 4;
+      ctx.stroke();
     });
   };
 
@@ -125,7 +126,8 @@ setTimeout(() => {
     canvas.removeEventListener("touchend", onTouchEnd);
     clearCanvas();
     decideColors();
-    setTimeout(() => emits("reload"), 10000);
+    message.success("SPLIT UP!");
+    setTimeout(() => clearCanvas(), 5000);
   };
 
   const draw = () => {
@@ -137,7 +139,7 @@ setTimeout(() => {
       ctx.fill();
     });
 
-    if (currentTouches.value.length === required) {
+    if (currentTouches.value.length === store.required) {
       if (timeout.value) clearTimeout(timeout.value);
       timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
     } else if (timeout.value) clearTimeout(timeout.value);
