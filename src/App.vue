@@ -1,18 +1,14 @@
 <template>
   <n-message-provider>
     <Icon
-      size="1.25rem"
-      style="position: absolute; top: 0; right: 0; margin: 1rem"
-      @click="
-        () => {
-          console.log('click');
-          showModal = true;
-        }
-      "
+      size="1.5rem"
+      style="position: absolute; top: 0; right: 0; padding: 1rem"
+      @click="() => (showModal = true)"
       ><Settings />
     </Icon>
     <Config :showModal="showModal" @close="() => (showModal = false)" />
-    <Chooser @reload="() => reload()" />
+    <canvas id="canvas" />
+    <Chooser v-if="readyCanvas" @reload="() => reload()" />
   </n-message-provider>
 </template>
 
@@ -26,6 +22,9 @@ import { Settings } from "@vicons/carbon";
 
 const showModal = ref(false);
 const reload = () => window.location.reload();
+
+const readyCanvas = ref(false);
+setTimeout(() => (readyCanvas.value = true), 1000);
 </script>
 
 <style scoped></style>

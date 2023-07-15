@@ -1,6 +1,4 @@
-<template>
-  <canvas id="canvas" />
-</template>
+<template></template>
 
 <script setup lang="ts">
 import { ref } from "vue";
@@ -27,125 +25,121 @@ const COLORS = [
 const currentTouches = ref<any[]>([]);
 const timeout = ref<any>(null);
 
-setTimeout(() => {
-  const canvas = document.getElementById("canvas") as HTMLCanvasElement | null;
-  if (!canvas) return;
+const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+const ctx = canvas.getContext("2d")!;
 
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
+const resizeCanvas = () => {
+  message.info("Resizing");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+};
 
-  const resizeCanvas = () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  };
+resizeCanvas();
 
-  resizeCanvas();
+window.addEventListener("resize", resizeCanvas, false);
 
-  // window.addEventListener("resize", resizeCanvas, false);
-
-  const findCurrentTouchIndex = function (id: any) {
-    for (let i = 0; i < currentTouches.value.length; i++) {
-      if (currentTouches.value[i].id === id) {
-        return i;
-      }
+const findCurrentTouchIndex = function (id: any) {
+  for (let i = 0; i < currentTouches.value.length; i++) {
+    if (currentTouches.value[i].id === id) {
+      return i;
     }
+  }
 
-    // Touch not found! Return -1.
-    return -1;
-  };
+  // Touch not found! Return -1.
+  return -1;
+};
 
-  const touchStarted = function (event: TouchEvent) {
-    const touches = event.changedTouches;
+const touchStarted = function (event: TouchEvent) {
+  const touches = event.changedTouches;
 
-    for (let i = 0; i < touches.length; i++) {
-      const touch = touches[i];
-      const touchColor = "#3F3F3F";
+  for (let i = 0; i < touches.length; i++) {
+    const touch = touches[i];
+    const touchColor = "#3F3F3F";
 
-      currentTouches.value.push({
-        id: touch.identifier,
-        pageX: touch.pageX,
-        pageY: touch.pageY,
-        color: touchColor,
-      });
-    }
-  };
-
-  const touchEnded = function (event: TouchEvent) {
-    const touches = event.changedTouches;
-
-    for (let i = 0; i < touches.length; i++) {
-      const touch = touches[i];
-      const currentTouchIndex = findCurrentTouchIndex(touch.identifier);
-      if (currentTouchIndex >= 0)
-        currentTouches.value.splice(currentTouchIndex, 1);
-      else console.log("Touch was not found!");
-    }
-  };
-
-  const onTouchStart = (e: TouchEvent) => {
-    e.preventDefault();
-    if (e.touches.length > store.required) return;
-    touchStarted(e);
-    draw();
-  };
-
-  const onTouchEnd = (e: TouchEvent) => {
-    e.preventDefault();
-    touchEnded(e);
-    draw();
-  };
-
-  const clearCanvas = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  };
-
-  const decideColors = () => {
-    const colorsAvailable: string[] = [];
-    for (let i = 0; i < store.required; i++)
-      colorsAvailable.push(COLORS[i % store.teams]);
-    colorsAvailable.sort(() => Math.random() - 0.5);
-
-    currentTouches.value.forEach((touch, i) => {
-      ctx.globalAlpha = 0.8;
-      ctx.beginPath();
-      ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
-      ctx.fillStyle = colorsAvailable[i];
-      ctx.fill();
-
-      ctx.globalAlpha = 0.6;
-      ctx.beginPath();
-      ctx.arc(touch.pageX, touch.pageY, 56, 0, 2 * Math.PI);
-      ctx.strokeStyle = colorsAvailable[i];
-      ctx.lineWidth = 4;
-      ctx.stroke();
+    currentTouches.value.push({
+      id: touch.identifier,
+      pageX: touch.pageX,
+      pageY: touch.pageY,
+      color: touchColor,
     });
-  };
+  }
+};
 
-  const fix = () => {
-    canvas.removeEventListener("touchstart", onTouchStart);
-    canvas.removeEventListener("touchend", onTouchEnd);
-    clearCanvas();
-    decideColors();
-    message.success("SPLIT UP!");
-    setTimeout(() => clearCanvas(), 5000);
-  };
+const touchEnded = function (event: TouchEvent) {
+  const touches = event.changedTouches;
 
-  const draw = () => {
-    clearCanvas();
-    currentTouches.value.forEach((touch) => {
-      ctx.beginPath();
-      ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
-      ctx.fillStyle = touch.color;
-      ctx.fill();
-    });
+  for (let i = 0; i < touches.length; i++) {
+    const touch = touches[i];
+    const currentTouchIndex = findCurrentTouchIndex(touch.identifier);
+    if (currentTouchIndex >= 0)
+      currentTouches.value.splice(currentTouchIndex, 1);
+    else console.log("Touch was not found!");
+  }
+};
 
-    if (currentTouches.value.length === store.required) {
-      if (timeout.value) clearTimeout(timeout.value);
-      timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
-    } else if (timeout.value) clearTimeout(timeout.value);
-  };
+const onTouchStart = (e: TouchEvent) => {
+  e.preventDefault();
+  if (e.touches.length > store.required) return;
+  touchStarted(e);
+  draw();
+};
 
-  canvas.addEventListener("touchstart", onTouchStart);
-  canvas.addEventListener("touchend", onTouchEnd);
-}, 100);
+const onTouchEnd = (e: TouchEvent) => {
+  e.preventDefault();
+  touchEnded(e);
+  draw();
+};
+
+const clearCanvas = () => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+};
+
+const decideColors = () => {
+  const colorsAvailable: string[] = [];
+  for (let i = 0; i < store.required; i++)
+    colorsAvailable.push(COLORS[i % store.teams]);
+  colorsAvailable.sort(() => Math.random() - 0.5);
+
+  currentTouches.value.forEach((touch, i) => {
+    ctx.globalAlpha = 0.8;
+    ctx.beginPath();
+    ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
+    ctx.fillStyle = colorsAvailable[i];
+    ctx.fill();
+
+    ctx.globalAlpha = 0.6;
+    ctx.beginPath();
+    ctx.arc(touch.pageX, touch.pageY, 56, 0, 2 * Math.PI);
+    ctx.strokeStyle = colorsAvailable[i];
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  });
+};
+
+const fix = () => {
+  canvas.removeEventListener("touchstart", onTouchStart);
+  canvas.removeEventListener("touchend", onTouchEnd);
+  clearCanvas();
+  decideColors();
+  message.success("SPLIT UP!");
+  setTimeout(() => clearCanvas(), 5000);
+};
+
+const draw = () => {
+  clearCanvas();
+  currentTouches.value.forEach((touch) => {
+    ctx.beginPath();
+    ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
+    ctx.fillStyle = touch.color;
+    ctx.fill();
+  });
+
+  if (currentTouches.value.length === store.required) {
+    if (timeout.value) clearTimeout(timeout.value);
+    timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
+  } else if (timeout.value) clearTimeout(timeout.value);
+};
+
+canvas.addEventListener("touchstart", onTouchStart);
+canvas.addEventListener("touchend", onTouchEnd);
 </script>

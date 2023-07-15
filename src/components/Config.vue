@@ -39,10 +39,7 @@ const showModal = ref(false);
 
 watch(
   () => props.showModal,
-  (value) => {
-    console.log("showModal", value);
-    showModal.value = value;
-  }
+  (value) => (showModal.value = value)
 );
 
 const onPositiveClick = () => {
