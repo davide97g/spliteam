@@ -28,15 +28,15 @@ const timeout = ref<any>(null);
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 
-const resizeCanvas = () => {
-  message.info("Resizing");
+const resizeCanvas = (firstTime?: boolean) => {
+  if (!firstTime) message.info("Resizing");
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 };
 
-resizeCanvas();
+resizeCanvas(true);
 
-window.addEventListener("resize", resizeCanvas, false);
+window.addEventListener("resize", () => resizeCanvas(), false);
 
 const findCurrentTouchIndex = function (id: any) {
   for (let i = 0; i < currentTouches.value.length; i++) {
