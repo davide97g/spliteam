@@ -28,7 +28,8 @@ setTimeout(() => {
   if (!canvas) return;
 
   console.log("canvas", canvas);
-  const ctx = canvas?.getContext("2d");
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
 
   const resizeCanvas = () => {
     canvas.width = window.innerWidth;
@@ -70,7 +71,6 @@ setTimeout(() => {
   const touchStarted = function (event: any) {
     const touches = event.changedTouches;
     message.value = `touchStarted: ${JSON.stringify(touches)}`;
-    if (!ctx) return;
 
     for (let i = 0; i < touches.length; i++) {
       const touch = touches[i];
@@ -82,11 +82,6 @@ setTimeout(() => {
         pageY: touch.pageY,
         color: touchColor,
       });
-
-      ctx.beginPath();
-      ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
-      ctx.fillStyle = touchColor;
-      ctx.fill();
     }
   };
 
@@ -95,7 +90,6 @@ setTimeout(() => {
   const touchEnded = function (event: any) {
     const touches = event.changedTouches;
     message.value = `touchEnded: ${JSON.stringify(touches)}`;
-    if (!ctx) return;
 
     for (let i = 0; i < touches.length; i++) {
       const touch = touches[i];
@@ -110,16 +104,29 @@ setTimeout(() => {
   // Event Listeners
   //-------------------------//
 
+  const draw = () => {
+    // clean the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    currentTouches.value.forEach((touch) => {
+      ctx.beginPath();
+      ctx.arc(touch.pageX, touch.pageY, 50, 0, 2 * Math.PI);
+      ctx.fillStyle = touch.color;
+      ctx.fill();
+    });
+  };
+
   // Set up an event listener for new touches.
   canvas.addEventListener("touchstart", function (e) {
     e.preventDefault();
     touchStarted(e);
+    draw();
   });
 
   // Set up an event listener for when a touch ends.
   canvas.addEventListener("touchend", function (e) {
     e.preventDefault();
     touchEnded(e);
+    draw();
   });
 }, 1000);
 </script>
