@@ -23,11 +23,11 @@
         <n-h1 style="color: white">Spliteam</n-h1>
         <n-button type="success" @click="startPlaying">PLAY</n-button>
       </div>
-      <Chooser v-else-if="canvas" :canvas="canvas" @reload="() => reload()" />
+      <Chooser v-else-if="canvas" :canvas="canvas" />
 
       <Footer />
       <audio id="myAudio">
-        <source src="/music/fluffing-a-duck.mp3" type="audio/mpeg" />
+        <source src="/music/cant-stop-my-feet.mp3" type="audio/mpeg" />
       </audio>
     </n-message-provider>
   </n-config-provider>
@@ -44,7 +44,6 @@ import { Music, MusicRemove, Settings } from "@vicons/carbon";
 import { theme } from "./theme";
 
 const showModal = ref(false);
-const reload = () => window.location.reload();
 
 const canvas = ref<HTMLCanvasElement | null>(null);
 
@@ -55,6 +54,14 @@ const myAudio = ref<HTMLAudioElement | null>(null);
 onMounted(() => {
   canvas.value = document.getElementById("canvas") as HTMLCanvasElement;
   myAudio.value = document.getElementById("myAudio") as HTMLAudioElement;
+  window.addEventListener("blur", stopAudio, false);
+  window.addEventListener(
+    "focus",
+    () => {
+      if (play.value && audioIsActive.value) playAudio();
+    },
+    false
+  );
   if (myAudio.value) {
     myAudio.value.volume = 0.1;
     myAudio.value.loop = true;
@@ -64,6 +71,10 @@ onMounted(() => {
 const startPlaying = () => {
   play.value = true;
   if (audioIsActive.value) playAudio();
+};
+
+const stopAudio = () => {
+  if (myAudio.value) myAudio.value.pause();
 };
 
 const toggleAudio = () => {
