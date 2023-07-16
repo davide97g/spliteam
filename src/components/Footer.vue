@@ -7,7 +7,7 @@
       padding: 10px;
     "
   >
-    <n-p style="color: white; font-size: 10px">
+    <n-p style="color: white; font-size: 10px; padding-left: 10px">
       v{{ packageJson.version }}
     </n-p>
   </div>

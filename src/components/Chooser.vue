@@ -97,15 +97,14 @@ const touchEnded = (event: TouchEvent) => {
 
 const onTouchStart = (e: TouchEvent) => {
   e.preventDefault();
-  message.info(`FINGERS: ${e.touches.length}`);
   if (currentTouches.value.length >= store.people) return;
-  else if (
-    store.people > store.maxTouchPoints &&
-    e.touches.length === store.maxTouchPoints + 1
-  )
-    message.info(`FIXED: ${store.maxTouchPoints} fingers`);
   touchStarted(e);
   draw();
+  // if (
+  //   store.people > store.maxTouchPoints &&
+  //   currentTouches.value.length === store.maxTouchPoints
+  // )
+  //   message.info(`FIXED: ${store.maxTouchPoints} fingers`);
 };
 
 const onTouchMove = (e: TouchEvent) => {
