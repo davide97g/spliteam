@@ -2,6 +2,7 @@
   <n-modal
     v-model:show="showModal"
     :mask-closable="false"
+    :show-icon="false"
     preset="dialog"
     title="Settings"
     positive-text="Update"
@@ -10,15 +11,17 @@
     @negative-click="onNegativeClick"
     @close="() => emits('close')"
   >
-    <n-p>Required</n-p>
-    <n-input-number v-model:value="store.required" min="1" max="10" />
+    <n-p>Max Touch Points: {{ store.maxTouchPoints }}</n-p>
+    <n-divider />
+    <n-p>People</n-p>
+    <n-input-number v-model:value="store.people" min="1" />
     <n-p>Teams</n-p>
-    <n-input-number v-model:value="store.teams" min="1" :max="store.required" />
+    <n-input-number v-model:value="store.teams" min="1" :max="store.people" />
   </n-modal>
 </template>
 
 <script setup lang="ts">
-import { useMessage, NModal, NInputNumber, NP } from "naive-ui";
+import { useMessage, NModal, NInputNumber, NP, NDivider } from "naive-ui";
 import { ref, watch } from "vue";
 import { useSettingsStore } from "../store/settings";
 
@@ -43,7 +46,7 @@ watch(
 );
 
 const onPositiveClick = () => {
-  message.success(`${store.required} REQUIRED x ${store.teams} TEAMS`);
+  message.success(`${store.people} People / ${store.teams} Teams`);
   showModal.value = false;
   emits("close");
 };

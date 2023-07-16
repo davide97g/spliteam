@@ -12,13 +12,18 @@ interface Touch {
   color: string;
 }
 
+const props = defineProps({
+  canvas: {
+    type: HTMLCanvasElement,
+    default: null,
+  },
+});
+
 const store = useSettingsStore();
 const message = useMessage();
 
-message.info(`Max touch points: ${navigator.maxTouchPoints.toString()}`);
-
 const DEFAULT_TIMEOUT = 500;
-const DEFAULT_COLOR = "#3F3F3F";
+const DEFAULT_COLOR = "#303030";
 const COLORS = [
   "#00A3EE",
   "#D80351",
@@ -35,12 +40,11 @@ const COLORS = [
 const currentTouches = ref<Touch[]>([]);
 const timeout = ref<NodeJS.Timeout | null>(null);
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d")!;
+const ctx = props.canvas.getContext("2d")!;
 
 const resizeCanvas = () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  props.canvas.width = window.innerWidth;
+  props.canvas.height = window.innerHeight;
 };
 
 resizeCanvas();
@@ -93,11 +97,12 @@ const touchEnded = (event: TouchEvent) => {
 
 const onTouchStart = (e: TouchEvent) => {
   e.preventDefault();
-  message.info(`Touch started! ${e.touches.length}`);
-  if (currentTouches.value.length >= store.required) {
-    message.error("Too many touches!");
-    return;
-  }
+  if (currentTouches.value.length >= store.people) return;
+  else if (
+    store.people > store.maxTouchPoints &&
+    e.touches.length === store.maxTouchPoints
+  )
+    message.info(`FIXED: ${store.maxTouchPoints} fingers`);
   touchStarted(e);
   draw();
 };
@@ -115,12 +120,12 @@ const onTouchEnd = (e: TouchEvent) => {
 };
 
 const clearCanvas = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, props.canvas.width, props.canvas.height);
 };
 
 const decideColors = () => {
   const colorsAvailable: string[] = [];
-  for (let i = 0; i < store.required; i++)
+  for (let i = 0; i < store.people; i++)
     colorsAvailable.push(COLORS[i % store.teams]);
   colorsAvailable.sort(() => Math.random() - 0.5);
 
@@ -141,15 +146,15 @@ const decideColors = () => {
 };
 
 const removeEvents = () => {
-  canvas.removeEventListener("touchstart", onTouchStart);
-  canvas.removeEventListener("touchmove", onTouchMove);
-  canvas.removeEventListener("touchend", onTouchEnd);
+  props.canvas.removeEventListener("touchstart", onTouchStart);
+  props.canvas.removeEventListener("touchmove", onTouchMove);
+  props.canvas.removeEventListener("touchend", onTouchEnd);
 };
 
 const addEvents = () => {
-  canvas.addEventListener("touchstart", onTouchStart);
-  canvas.addEventListener("touchmove", onTouchMove);
-  canvas.addEventListener("touchend", onTouchEnd);
+  props.canvas.addEventListener("touchstart", onTouchStart);
+  props.canvas.addEventListener("touchmove", onTouchMove);
+  props.canvas.addEventListener("touchend", onTouchEnd);
 };
 
 const clearData = () => {
@@ -177,7 +182,7 @@ const draw = () => {
     ctx.fill();
   });
 
-  if (currentTouches.value.length === store.required) {
+  if (currentTouches.value.length === store.people) {
     if (timeout.value) clearTimeout(timeout.value);
     timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
   } else if (timeout.value) clearTimeout(timeout.value);
