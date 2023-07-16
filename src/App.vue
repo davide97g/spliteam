@@ -27,7 +27,7 @@
 
       <Footer />
       <audio id="myAudio">
-        <source src="music/fluffing-a-duck.mp3" type="audio/mpeg" />
+        <source src="/music/fluffing-a-duck.mp3" type="audio/mpeg" />
       </audio>
     </n-message-provider>
   </n-config-provider>
