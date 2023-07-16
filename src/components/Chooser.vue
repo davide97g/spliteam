@@ -15,7 +15,10 @@ interface Touch {
 const store = useSettingsStore();
 const message = useMessage();
 
-const DEFAULT_TIMEOUT = 1000;
+message.info(`Max touch points: ${navigator.maxTouchPoints.toString()}`);
+
+const DEFAULT_TIMEOUT = 500;
+const DEFAULT_COLOR = "#3F3F3F";
 const COLORS = [
   "#00A3EE",
   "#D80351",
@@ -52,7 +55,7 @@ const touchStarted = (event: TouchEvent) => {
 
   for (let i = 0; i < touches.length; i++) {
     const touch = touches[i];
-    const touchColor = "#3F3F3F";
+    const touchColor = DEFAULT_COLOR;
 
     currentTouches.value.push({
       id: touch.identifier,
@@ -91,7 +94,7 @@ const touchEnded = (event: TouchEvent) => {
 const onTouchStart = (e: TouchEvent) => {
   e.preventDefault();
   message.info(`Touch started! ${e.touches.length}`);
-  if (currentTouches.value.length > store.required) {
+  if (currentTouches.value.length >= store.required) {
     message.error("Too many touches!");
     return;
   }
