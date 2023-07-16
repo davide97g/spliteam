@@ -13,7 +13,7 @@ export default defineConfig({
         name: "Spliteam",
         short_name: "spliteam",
         description: "A simple app to split your team",
-        theme_color: "#ffffff",
+        theme_color: "#1b1626",
         icons: [
           {
             src: "/images/ios/192.png",

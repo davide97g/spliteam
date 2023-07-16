@@ -5,6 +5,13 @@ import { ref } from "vue";
 import { useSettingsStore } from "../store/settings";
 import { useMessage } from "naive-ui";
 
+interface Touch {
+  id: number;
+  pageX: number;
+  pageY: number;
+  color: string;
+}
+
 const store = useSettingsStore();
 const message = useMessage();
 
@@ -22,34 +29,25 @@ const COLORS = [
 ];
 // const SHAPES = ["circle", "square", "triangle"];
 
-const currentTouches = ref<any[]>([]);
-const timeout = ref<any>(null);
+const currentTouches = ref<Touch[]>([]);
+const timeout = ref<NodeJS.Timeout | null>(null);
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 
-const resizeCanvas = (firstTime?: boolean) => {
-  if (!firstTime) message.info("Resizing");
+const resizeCanvas = () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 };
 
-resizeCanvas(true);
+resizeCanvas();
 
-window.addEventListener("resize", () => resizeCanvas(), false);
+window.addEventListener("resize", resizeCanvas, false);
 
-const findCurrentTouchIndex = function (id: any) {
-  for (let i = 0; i < currentTouches.value.length; i++) {
-    if (currentTouches.value[i].id === id) {
-      return i;
-    }
-  }
+const findCurrentTouchIndex = (id: any) =>
+  currentTouches.value.findIndex((touch) => touch.id === id);
 
-  // Touch not found! Return -1.
-  return -1;
-};
-
-const touchStarted = function (event: TouchEvent) {
+const touchStarted = (event: TouchEvent) => {
   const touches = event.changedTouches;
 
   for (let i = 0; i < touches.length; i++) {
@@ -65,7 +63,20 @@ const touchStarted = function (event: TouchEvent) {
   }
 };
 
-const touchEnded = function (event: TouchEvent) {
+const touchMove = (event: TouchEvent) => {
+  const touches = event.changedTouches;
+
+  for (let i = 0; i < touches.length; i++) {
+    const touch = touches[i];
+    const currentTouchIndex = findCurrentTouchIndex(touch.identifier);
+    if (currentTouchIndex >= 0) {
+      currentTouches.value[currentTouchIndex].pageX = touch.pageX;
+      currentTouches.value[currentTouchIndex].pageY = touch.pageY;
+    } else console.log("Touch was not found!");
+  }
+};
+
+const touchEnded = (event: TouchEvent) => {
   const touches = event.changedTouches;
 
   for (let i = 0; i < touches.length; i++) {
@@ -79,8 +90,18 @@ const touchEnded = function (event: TouchEvent) {
 
 const onTouchStart = (e: TouchEvent) => {
   e.preventDefault();
-  if (e.touches.length > store.required) return;
+  message.info(`Touch started! ${e.touches.length}`);
+  if (currentTouches.value.length > store.required) {
+    message.error("Too many touches!");
+    return;
+  }
   touchStarted(e);
+  draw();
+};
+
+const onTouchMove = (e: TouchEvent) => {
+  e.preventDefault();
+  touchMove(e);
   draw();
 };
 
@@ -118,11 +139,13 @@ const decideColors = () => {
 
 const removeEvents = () => {
   canvas.removeEventListener("touchstart", onTouchStart);
+  canvas.removeEventListener("touchmove", onTouchMove);
   canvas.removeEventListener("touchend", onTouchEnd);
 };
 
 const addEvents = () => {
   canvas.addEventListener("touchstart", onTouchStart);
+  canvas.addEventListener("touchmove", onTouchMove);
   canvas.addEventListener("touchend", onTouchEnd);
 };
 
