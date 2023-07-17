@@ -51,6 +51,25 @@ resizeCanvas();
 
 window.addEventListener("resize", resizeCanvas, false);
 
+window.addEventListener(
+  "blur",
+  () => {
+    removeEvents();
+    clearCanvas();
+    clearData();
+  },
+  false
+);
+window.addEventListener(
+  "focus",
+  () => {
+    addEvents();
+    clearCanvas();
+    clearData();
+  },
+  false
+);
+
 const findCurrentTouchIndex = (id: any) =>
   currentTouches.value.findIndex((touch) => touch.id === id);
 
