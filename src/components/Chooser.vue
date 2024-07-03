@@ -1,9 +1,10 @@
 <template></template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { useSettingsStore } from "../store/settings";
 import { useMessage } from "naive-ui";
+import { ref } from "vue";
+import { useConfettiStore } from "../store/confetti";
+import { useSettingsStore } from "../store/settings";
 
 interface Touch {
   id: number;
@@ -20,6 +21,7 @@ const props = defineProps({
 });
 
 const store = useSettingsStore();
+const confetti = useConfettiStore();
 const message = useMessage();
 
 const DEFAULT_TIMEOUT = 500;
@@ -35,7 +37,6 @@ const COLORS = [
   "#FFDAC1",
   "#BDE0FE",
 ];
-// const SHAPES = ["circle", "square", "triangle"];
 
 const currentTouches = ref<Touch[]>([]);
 const timeout = ref<NodeJS.Timeout | null>(null);
@@ -76,8 +77,7 @@ const findCurrentTouchIndex = (id: any) =>
 const touchStarted = (event: TouchEvent) => {
   const touches = event.changedTouches;
 
-  for (let i = 0; i < touches.length; i++) {
-    const touch = touches[i];
+  for (const touch of touches) {
     const touchColor = DEFAULT_COLOR;
 
     currentTouches.value.push({
@@ -92,8 +92,7 @@ const touchStarted = (event: TouchEvent) => {
 const touchMove = (event: TouchEvent) => {
   const touches = event.changedTouches;
 
-  for (let i = 0; i < touches.length; i++) {
-    const touch = touches[i];
+  for (const touch of touches) {
     const currentTouchIndex = findCurrentTouchIndex(touch.identifier);
     if (currentTouchIndex >= 0) {
       currentTouches.value[currentTouchIndex].pageX = touch.pageX;
@@ -105,8 +104,7 @@ const touchMove = (event: TouchEvent) => {
 const touchEnded = (event: TouchEvent) => {
   const touches = event.changedTouches;
 
-  for (let i = 0; i < touches.length; i++) {
-    const touch = touches[i];
+  for (const touch of touches) {
     const currentTouchIndex = findCurrentTouchIndex(touch.identifier);
     if (currentTouchIndex >= 0)
       currentTouches.value.splice(currentTouchIndex, 1);
@@ -119,11 +117,6 @@ const onTouchStart = (e: TouchEvent) => {
   if (currentTouches.value.length >= store.people) return;
   touchStarted(e);
   draw();
-  // if (
-  //   store.people > store.maxTouchPoints &&
-  //   currentTouches.value.length === store.maxTouchPoints
-  // )
-  //   message.info(`FIXED: ${store.maxTouchPoints} fingers`);
 };
 
 const onTouchMove = (e: TouchEvent) => {
@@ -185,6 +178,7 @@ const fix = () => {
   clearCanvas();
   decideColors();
   message.success("SPLIT UP!");
+  confetti.showConfetti();
   setTimeout(() => {
     clearCanvas();
     clearData();
