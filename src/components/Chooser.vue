@@ -24,18 +24,15 @@ const store = useSettingsStore();
 const confetti = useConfettiStore();
 const message = useMessage();
 
-const DEFAULT_TIMEOUT = 1000;
+const DEFAULT_TIMEOUT = 2000;
 const DEFAULT_COLOR = "#303030";
 const COLORS = [
   "#00A3EE",
   "#D80351",
   "#F9B700",
-  "#FFA3B1",
-  "#FFD1BA",
-  "#B5EAD7",
-  "#C7CEEA",
-  "#FFDAC1",
-  "#BDE0FE",
+  "#8B5CF6",
+  "#32CD32",
+  "#FF007F",
 ];
 
 const currentTouches = ref<Touch[]>([]);
@@ -110,7 +107,10 @@ const touchEnded = (event: TouchEvent) => {
       currentTouches.value.splice(currentTouchIndex, 1);
     else console.log("Touch was not found!");
   }
-  if (timeout.value) clearTimeout(timeout.value);
+  if (timeout.value) {
+    clearTimeout(timeout.value);
+    timeout.value = null;
+  }
 };
 
 const onTouchStart = (e: TouchEvent) => {
@@ -138,8 +138,9 @@ const clearCanvas = () => {
 
 const decideColors = () => {
   const colorsAvailable: string[] = [];
+  const colors = COLORS.sort(() => Math.random() - 0.5);
   for (let i = 0; i < store.people; i++)
-    colorsAvailable.push(COLORS[i % store.teams]);
+    colorsAvailable.push(colors[i % store.teams]);
   colorsAvailable.sort(() => Math.random() - 0.5);
 
   currentTouches.value.forEach((touch, i) => {
