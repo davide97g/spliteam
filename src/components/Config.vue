@@ -11,17 +11,81 @@
     @negative-click="onNegativeClick"
     @close="() => emits('close')"
   >
-    <n-p>Max Touch Points: {{ store.maxTouchPoints }}</n-p>
-    <n-divider />
-    <n-p>People</n-p>
-    <n-input-number v-model:value="store.people" min="1" />
-    <n-p>Teams</n-p>
-    <n-input-number v-model:value="store.teams" min="1" :max="store.people" />
+    <div style="display: flex; flex-direction: column; gap: 0.5rem">
+      <n-p>Max Touch Points: {{ store.maxTouchPoints }}</n-p>
+      <n-divider />
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 1rem;
+          justify-content: space-between;
+        "
+      >
+        <n-text
+          >People: <n-text type="info"> {{ store.people }}</n-text></n-text
+        >
+        <div
+          style="
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: space-between;
+          "
+        >
+          <n-button
+            size="medium"
+            @click="() => (store.people -= 1)"
+            :disabled="store.people === 1"
+            ><Icon><Subtract /></Icon
+          ></n-button>
+          <n-button size="medium" @click="() => (store.people += 1)"
+            ><Icon><Add /></Icon
+          ></n-button>
+        </div>
+      </div>
+      <div
+        style="
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 1rem;
+          justify-content: space-between;
+        "
+      >
+        <n-text
+          >Teams: <n-text type="info"> {{ store.teams }}</n-text></n-text
+        >
+        <div
+          style="
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: space-between;
+          "
+        >
+          <n-button
+            size="medium"
+            @click="() => (store.teams -= 1)"
+            :disabled="store.teams === 1"
+            ><Icon><Subtract /></Icon
+          ></n-button>
+          <n-button size="medium" @click="() => (store.teams += 1)"
+            ><Icon><Add /></Icon
+          ></n-button>
+        </div>
+      </div>
+    </div>
   </n-modal>
 </template>
 
 <script setup lang="ts">
-import { useMessage, NModal, NInputNumber, NP, NDivider } from "naive-ui";
+import { Add, Subtract } from "@vicons/carbon";
+import { Icon } from "@vicons/utils";
+import { NButton, NDivider, NModal, NP, NText, useMessage } from "naive-ui";
 import { ref, watch } from "vue";
 import { useSettingsStore } from "../store/settings";
 

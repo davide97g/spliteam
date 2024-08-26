@@ -7,13 +7,6 @@
         @click="() => (showModal = true)"
         ><Settings />
       </Icon>
-      <Icon
-        size="1.5rem"
-        style="position: absolute; top: 30px; right: 0; padding: 1rem"
-        @click="toggleAudio"
-        ><Music v-if="audioIsActive" />
-        <MusicRemove v-else />
-      </Icon>
 
       <Config :showModal="showModal" @close="() => (showModal = false)" />
 
@@ -26,9 +19,6 @@
       <Chooser v-else-if="canvas" :canvas="canvas" />
 
       <Footer />
-      <audio id="myAudio">
-        <source src="/music/cant-stop-my-feet.mp3" type="audio/mpeg" />
-      </audio>
     </n-message-provider>
   </n-config-provider>
 </template>
@@ -40,7 +30,7 @@ import Config from "./components/Config.vue";
 import Footer from "./components/Footer.vue";
 import { NMessageProvider, NButton, NH1, NConfigProvider } from "naive-ui";
 import { Icon } from "@vicons/utils";
-import { Music, MusicRemove, Settings } from "@vicons/carbon";
+import { Settings } from "@vicons/carbon";
 import { theme } from "./theme";
 
 const showModal = ref(false);
@@ -48,46 +38,13 @@ const showModal = ref(false);
 const canvas = ref<HTMLCanvasElement | null>(null);
 
 const play = ref(false);
-const audioIsActive = ref(true);
-const myAudio = ref<HTMLAudioElement | null>(null);
 
 onMounted(() => {
   canvas.value = document.getElementById("canvas") as HTMLCanvasElement;
-  myAudio.value = document.getElementById("myAudio") as HTMLAudioElement;
-  window.addEventListener("blur", stopAudio, false);
-  window.addEventListener(
-    "focus",
-    () => {
-      if (play.value && audioIsActive.value) playAudio();
-    },
-    false
-  );
-  if (myAudio.value) {
-    myAudio.value.volume = 0.1;
-    myAudio.value.loop = true;
-  }
 });
 
 const startPlaying = () => {
   play.value = true;
-  if (audioIsActive.value) playAudio();
-};
-
-const stopAudio = () => {
-  if (myAudio.value) myAudio.value.pause();
-};
-
-const toggleAudio = () => {
-  audioIsActive.value = !audioIsActive.value;
-  if (myAudio.value) {
-    if (myAudio.value.paused && audioIsActive.value && play.value)
-      myAudio.value.play();
-    else if (!audioIsActive.value) myAudio.value.pause();
-  }
-};
-
-const playAudio = () => {
-  if (myAudio.value && audioIsActive.value) myAudio.value.play();
 };
 </script>
 

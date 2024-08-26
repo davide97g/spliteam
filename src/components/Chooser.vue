@@ -24,7 +24,7 @@ const store = useSettingsStore();
 const confetti = useConfettiStore();
 const message = useMessage();
 
-const DEFAULT_TIMEOUT = 500;
+const DEFAULT_TIMEOUT = 1000;
 const DEFAULT_COLOR = "#303030";
 const COLORS = [
   "#00A3EE",
@@ -110,6 +110,7 @@ const touchEnded = (event: TouchEvent) => {
       currentTouches.value.splice(currentTouchIndex, 1);
     else console.log("Touch was not found!");
   }
+  if (timeout.value) clearTimeout(timeout.value);
 };
 
 const onTouchStart = (e: TouchEvent) => {
@@ -148,11 +149,11 @@ const decideColors = () => {
     ctx.fillStyle = colorsAvailable[i];
     ctx.fill();
 
-    ctx.globalAlpha = 0.6;
+    ctx.globalAlpha = 0.5;
     ctx.beginPath();
-    ctx.arc(touch.pageX, touch.pageY, 56, 0, 2 * Math.PI);
+    ctx.arc(touch.pageX, touch.pageY, 60, 0, 2 * Math.PI);
     ctx.strokeStyle = colorsAvailable[i];
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 6;
     ctx.stroke();
   });
 };
@@ -171,6 +172,7 @@ const addEvents = () => {
 
 const clearData = () => {
   currentTouches.value = [];
+  timeout.value = null;
 };
 
 const fix = () => {
@@ -195,10 +197,11 @@ const draw = () => {
     ctx.fill();
   });
 
-  if (currentTouches.value.length === store.people) {
-    if (timeout.value) clearTimeout(timeout.value);
+  if (currentTouches.value.length === store.people && !timeout.value) {
+    // if (timeout.value) clearTimeout(timeout.value);
     timeout.value = setTimeout(() => fix(), DEFAULT_TIMEOUT);
-  } else if (timeout.value) clearTimeout(timeout.value);
+  }
+  // else if (timeout.value) clearTimeout(timeout.value);
 };
 
 addEvents();
